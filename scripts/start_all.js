@@ -113,11 +113,7 @@ addProcess('star', startStarSignal);
 
 addProcess('webpack', () =>
   new Promise((resolve, reject) => {
-    let webpackArgs = ['run', 'webpack'];
-    if (!args['without-https']) {
-      webpackArgs = webpackArgs.concat(['--https', '--key', './ssl/localhost+2-key.pem', '--cert', './ssl/localhost+2.pem']);
-    }
-    const webpackProcess = spawn('yarn', webpackArgs, {
+    const webpackProcess = spawn('yarn', ['run', 'webpack'], {
       cwd: path.resolve(__dirname, '..'),
       stdio: 'pipe',
     });
