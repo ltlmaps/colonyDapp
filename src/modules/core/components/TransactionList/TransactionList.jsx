@@ -27,7 +27,8 @@ type Props = {|
    * Title to show before the list
    */
   label?: string | MessageDescriptor,
-  transactions: ?Array<ContractTransactionType>,
+  // transactions: ?NormalizedEvent[],
+  transactions: *,
   isLoading?: boolean,
   /*
    * The user's address will always be shown, this just controls if it's
@@ -66,7 +67,7 @@ const TransactionList = ({
           <TableBody>
             {transactions.map(transaction => (
               <TransactionListItem
-                key={transaction.hash}
+                key={transaction.meta.id}
                 linkToEtherscan={linkToEtherscan}
                 showMaskedAddress={showMaskedAddress}
                 transaction={transaction}

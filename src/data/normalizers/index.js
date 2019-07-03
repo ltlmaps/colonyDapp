@@ -1,14 +1,17 @@
 /* @flow */
 
+import type BigNumber from 'bn.js';
+
 import type { Event } from '../types';
 import { VERSION } from '../constants';
 
 export const CONTRACT_EVENT_SOURCE = 'contract';
 export const DDB_EVENT_SOURCE = 'ddb';
+export const TRANSACTION_EVENT_SOURCE = 'transaction';
 // const GITHUB_SOURCE_TYPE
 // const OTHER_3RD_PARTY_SOURCE_TYPE
 
-opaque type EVENT_SOURCE_TYPE = 'contract' | 'ddb';
+opaque type EVENT_SOURCE_TYPE = 'contract' | 'ddb' | 'transaction';
 
 type NormalizedEvent = {|
   type: string, // Event type a.k.a event name
@@ -18,6 +21,7 @@ type NormalizedEvent = {|
     sourceId: string, // Orbit store address or log transaction hash
     sourceType: EVENT_SOURCE_TYPE, // See above
     actorId: string, // Wallet address for orbit-db events or tx sender address for tx logs
+    targetId?: string,
     timestamp: number,
     version: typeof VERSION,
   |},
@@ -32,6 +36,10 @@ type TransactionLog = {|
   timestamp: number,
   transaction: {
     from: string,
+    gasPrice: BigNumber,
+  },
+  receipt: {
+    gasUsed: BigNumber,
   },
 |};
 
@@ -79,6 +87,35 @@ export const normalizeTransactionLog = (
   },
 });
 
+export const normalizeTransaction = (
+  contractAddress: string,
+  {
+    event: { eventName, ...args },
+    log: { logIndex, transactionHash },
+    timestamp,
+    transaction: { from, gasPrice },
+    receipt: { gasUsed },
+    functionName: type,
+    functionParams,
+  }: TransactionLog & { functionName: string, functionParams: Object },
+): NormalizedEvent => ({
+  type,
+  payload: {
+    ...args,
+    ...functionParams,
+    transactionFee: gasUsed.mul(gasPrice),
+  },
+  meta: {
+    id: transactionHash,
+    sourceType: TRANSACTION_EVENT_SOURCE,
+    sourceId: contractAddress,
+    actorId: from,
+    targetId: args.to || args.worker,
+    timestamp,
+    version: VERSION,
+  },
+});
+
 export const normalizeEvent = (
   eventSourceType: string,
 ): ((
@@ -88,4 +125,5 @@ export const normalizeEvent = (
   ({
     CONTRACT_EVENT_SOURCE: normalizeTransactionLog,
     DDB_EVENT_SOURCE: normalizeDDBStoreEvent,
+    TRANSACTION_EVENT_SOURCE: normalizeTransaction,
   }[eventSourceType]);

@@ -58,6 +58,9 @@ export const decorateLog = async (
   const transaction = await client.adapter.provider.getTransaction(
     transactionHash,
   );
+  const receipt = await client.adapter.provider.getTransactionReceipt(
+    transactionHash,
+  );
 
   let parsedEvent = event;
   if (!parsedEvent) {
@@ -68,6 +71,7 @@ export const decorateLog = async (
   return {
     event: parsedEvent,
     log,
+    receipt,
     transaction,
     timestamp: new Date(timestamp).getTime() * 1e3,
   };

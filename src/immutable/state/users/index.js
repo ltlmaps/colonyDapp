@@ -23,7 +23,8 @@ import type { TaskDraftId } from '~immutable/Task';
 export * from './AllUsers';
 
 export type CurrentUserTransactionsType = DataRecordType<
-  ListType<ContractTransactionRecordType>,
+  // ListType<ContractTransactionRecordType>,
+  ListType<*>,
 >;
 
 export type CurrentUserPermissionsType = ImmutableMapType<

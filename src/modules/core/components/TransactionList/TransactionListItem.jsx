@@ -4,7 +4,7 @@
 import React, { useCallback } from 'react';
 import { defineMessages, FormattedDate } from 'react-intl';
 
-import type { ContractTransactionType, TokenType, UserType } from '~immutable';
+import type { ColonyType, TokenType, UserType } from '~immutable';
 
 import { TableRow, TableCell } from '~core/Table';
 import { ActionButton } from '~core/Button';
@@ -13,10 +13,11 @@ import Icon from '~core/Icon';
 import TransactionLink from '~core/TransactionLink';
 import { ACTIONS } from '~redux';
 import { mergePayload } from '~utils/actions';
-import { useDataFetcher } from '~utils/hooks';
+import { useDataFetcher, useSelector } from '~utils/hooks';
 
-import { tokenFetcher } from '../../../dashboard/fetchers';
+import { colonyFetcher, tokenFetcher } from '../../../dashboard/fetchers';
 import { userFetcher } from '../../../users/fetchers';
+import { walletAddressSelector } from '../../../users/selectors';
 
 import TransactionDetails from './TransactionDetails.jsx';
 
@@ -47,7 +48,8 @@ type Props = {|
   /*
    * The given contract transaction.
    */
-  transaction: ContractTransactionType,
+  // transaction: NormalizedEvent,
+  transaction: *,
   /*
    * User and colony addresses will always be shown; this controls whether the
    * address is shown in full, or masked.
@@ -65,55 +67,52 @@ const TransactionListItem = ({
   linkToEtherscan,
   showMaskedAddress = true,
   transaction: {
-    amount,
-    colonyAddress,
-    date,
-    incoming,
-    token: tokenAddress,
-    from: senderAddress,
-    to: recipientAddress,
+    type,
+    payload,
+    meta: { sourceId, actorId, timestamp },
   },
   transaction,
 }: Props) => {
-  const userAddress = incoming ? senderAddress : recipientAddress;
+  const walletAddress = useSelector(walletAddressSelector);
+
   const { data: user } = useDataFetcher<UserType>(
     userFetcher,
-    [userAddress],
-    [userAddress],
+    [actorId],
+    [actorId],
   );
 
   const { data: token } = useDataFetcher<TokenType>(
     tokenFetcher,
-    [tokenAddress],
-    [tokenAddress],
+    [sourceId],
+    [sourceId],
   );
 
-  /**
-   * @todo Support fetching of tasks by `taskId`
-   * */
-  // const { data: task } = useDataFetcher<TokenType>(
-  //   taskFetcher,
-  //   [taskId],
-  //   [taskId],
-  // );
+  const { data: colony } = useDataFetcher<ColonyType>(
+    colonyFetcher,
+    [sourceId],
+    [sourceId],
+  );
 
-  const transform = useCallback(mergePayload({ colonyAddress, tokenAddress }), [
-    colonyAddress,
-    tokenAddress,
-  ]);
+  const transform = useCallback(
+    mergePayload({
+      colonyAddress: colony && colony.colonyAddress,
+      tokenAddress: token && token.address,
+    }),
+    [colony, token],
+  );
 
   return (
     <TableRow className={styles.main}>
       <TableCell className={styles.transactionDate}>
         <div className={styles.dateDay}>
-          <FormattedDate value={date} day="numeric" />
+          <FormattedDate value={new Date(timestamp)} day="numeric" />
         </div>
         <div className={styles.dateMonth}>
-          <FormattedDate value={date} month="short" />
+          <FormattedDate value={new Date(timestamp)} month="short" />
         </div>
       </TableCell>
       <TableCell className={styles.transactionStatus}>
-        {incoming ? (
+        {actorId === walletAddress ? (
           <Icon
             name="circle-arrow-down"
             title={MSG.incomingTransactionTitle}
@@ -128,14 +127,13 @@ const TransactionListItem = ({
         )}
       </TableCell>
       <TableCell className={styles.transactionDetails}>
-        <TransactionDetails
-          transaction={transaction}
-          user={user ? user.profile : undefined}
-          showMaskedAddress={showMaskedAddress}
-        />
+        <p>
+          {type}: {colony && colony.colonyName}{' '}
+          {user && user.profile && user.profile.username} {token && token.name}
+        </p>
       </TableCell>
       <TableCell className={styles.transactionAmountActions}>
-        {!linkToEtherscan && colonyAddress && tokenAddress && (
+        {!linkToEtherscan && colony && token && (
           <div className={styles.buttonWrapper}>
             <ActionButton
               text={MSG.buttonClaim}
@@ -147,23 +145,20 @@ const TransactionListItem = ({
             />
           </div>
         )}
-        {linkToEtherscan && transaction.hash && (
+        {linkToEtherscan && (
           <div className={styles.etherscanButtonWrapper}>
             <TransactionLink
               className={styles.customButton}
-              hash={transaction.hash}
+              hash={sourceId}
               text={MSG.buttonEtherscan}
             />
           </div>
         )}
         <Numeral
-          value={amount}
+          value={payload.amount || payload.transactionFee}
           unit="ether"
-          truncate={1}
-          /**
-           * @todo : what should we show when we don't recognise the token?
-           */
-          suffix={` ${(token && token.symbol) || '???'}`}
+          truncate={3}
+          suffix={` ${(token && token.symbol) || 'ETH'}`}
         />
       </TableCell>
     </TableRow>

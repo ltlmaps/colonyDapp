@@ -13,15 +13,12 @@ import type {
   UserMetadataStore,
 } from '~data/types';
 
-import type {
-  ContractTransactionType,
-  UserProfileType,
-  UserPermissionsType,
-} from '~immutable';
+import type { UserProfileType, UserPermissionsType } from '~immutable';
 
 import {
   normalizeDDBStoreEvent,
   normalizeTransactionLog,
+  normalizeTransaction,
 } from '~data/normalizers';
 
 import {
@@ -30,6 +27,8 @@ import {
   COLONY_ROLE_RECOVERY,
 } from '@colony/colony-js-client';
 import flatMap from 'lodash/flatMap';
+import flatten from 'lodash/flatten';
+import sortBy from 'lodash/sortBy';
 import BigNumber from 'bn.js';
 import { formatEther } from 'ethers/utils';
 
@@ -37,11 +36,7 @@ import { CONTEXT } from '~context';
 import { USER_EVENT_TYPES } from '~data/constants';
 import { ZERO_ADDRESS } from '~utils/web3/constants';
 import { reduceToLastState } from '~utils/reducers';
-import {
-  getDecoratedEvents,
-  getEventLogs,
-  parseUserTransferEvent,
-} from '~utils/web3/eventLogs';
+import { getDecoratedEvents } from '~utils/web3/eventLogs';
 import {
   getUserProfileStore,
   getUserInboxStore,
@@ -290,10 +285,6 @@ export const getUserPermissions: Query<
   },
 };
 
-/**
- * This query gets all tokens sent from or received to this wallet since a certain block time
- * @todo Use a meaningful value for `blocksBack` when getting past transactions.
- */
 export const getUserColonyTransactions: Query<
   ColonyClient,
   void,
@@ -301,57 +292,170 @@ export const getUserColonyTransactions: Query<
     userColonyAddresses: Address[],
     walletAddress: string,
   |},
-  ContractTransactionType[],
+  // NormalizedEvent[],
+  *,
 > = {
   name: 'getUserColonyTransactions',
   context: [CONTEXT.COLONY_MANAGER],
   prepare: prepareMetaColonyClientQuery,
   async execute(metaColonyClient, { walletAddress, userColonyAddresses }) {
-    const { tokenClient } = metaColonyClient;
+    const encodeHexTopic = (data: string) =>
+      data && data.slice(0, 2) === '0x'
+        ? `0x${data
+            .toLowerCase()
+            .slice(2)
+            .padStart(64, '0')}`
+        : `0x${data.toLowerCase().padStart(64, '0')}`;
+
+    const addressEquals = (a: string, b: string) =>
+      a.toLowerCase() === b.toLowerCase();
+
     const {
-      events: { Transfer },
-    } = tokenClient;
-    const logFilterOptions = {
-      blocksBack: 400000,
-      events: [Transfer],
+      events: {
+        ColonyFundsClaimed,
+        ColonyFundsMovedBetweenFundingPots,
+        PayoutClaimed,
+        DomainAdded,
+        ColonyRoleSet,
+      },
+      tokenClient: {
+        events: { Transfer, Mint },
+      },
+      tokenClient,
+    } = metaColonyClient;
+
+    const filterTransactionsFromCurrentUser = transactions =>
+      transactions.filter(({ transaction: { from } }) =>
+        addressEquals(from, walletAddress),
+      );
+
+    const decode = (tx, contractClient) => {
+      const {
+        transaction: { data },
+      } = tx;
+      const functionSig = data.slice(0, 10).toLowerCase();
+      console.log(contractClient);
+      const [functionName] =
+        Object.entries(contractClient).find(
+          ([, method]) => {
+            if (!method.client) return false;
+            console.log(method)
+            return !!Object.entries(method.client.contract.interface.functions).find(([functionName, { sighash }]) => functionName === method.functionName && sighash && sighash.toLowerCase() === functionSig);
+          },
+        ) || [];
+      return {
+        functionName,
+        functionParams: {
+          [functionName]: true,
+        },
+      };
     };
 
-    const transferToEventLogs = await getEventLogs(
-      tokenClient,
-      {},
-      {
-        ...logFilterOptions,
-        to: walletAddress,
-      },
-    );
+    const decodeTransactionData = contractClient => transactions =>
+      transactions.map(tx => {
+        const { functionName, functionParams } = decode(tx, contractClient);
+        return {
+          ...tx,
+          functionName,
+          functionParams,
+        };
+      });
 
-    const transferFromEventLogs = await getEventLogs(
-      tokenClient,
-      {},
-      {
-        ...logFilterOptions,
-        from: walletAddress,
-      },
-    );
+    const mergeByHash = transactions =>
+      Object.values(
+        transactions.reduce((acc, tx) => {
+          const {
+            transaction: { hash },
+          } = tx;
+          const existingTx = acc[hash];
+          return {
+            ...acc,
+            [hash]: existingTx
+              ? {
+                  ...existingTx,
+                  event: {
+                    ...tx.event,
+                    ...existingTx.event,
+                  },
+                  functionName: existingTx.functionName || tx.functionName,
+                  functionParams:
+                    existingTx.functionParams || tx.functionParams,
+                }
+              : tx,
+          };
+        }, {}),
+      );
 
-    // Combine and sort logs by blockNumber, then parse events from thihs
-    const logs = [...transferToEventLogs, ...transferFromEventLogs].sort(
-      // $FlowFixMe colonyJS Log should contain blockNumber
-      (a, b) => a.blockNumber - b.blockNumber,
-    );
-    const transferEvents = await tokenClient.parseLogs(logs);
+    const normalize = transactions =>
+      transactions.map(tx => normalizeTransaction(tx.log.address, tx));
 
-    return Promise.all(
-      transferEvents.map((event, i) =>
-        parseUserTransferEvent({
-          event,
-          log: logs[i],
-          tokenClient,
-          userColonyAddresses,
-          walletAddress,
-        }),
+    // relevant events for any user subscribed colony
+    const colonyTransactionsPromise = Promise.all([
+      ...userColonyAddresses.map(colonyAddress =>
+        getDecoratedEvents(
+          metaColonyClient,
+          {
+            address: colonyAddress,
+          },
+          {
+            blocksBack: 400000,
+            events: [
+              ColonyFundsClaimed,
+              ColonyFundsMovedBetweenFundingPots,
+              PayoutClaimed,
+              DomainAdded,
+              ColonyRoleSet,
+            ],
+          },
+        ),
       ),
+      getDecoratedEvents(
+        tokenClient,
+        {
+          topics: [
+            Mint.interface.topics,
+            userColonyAddresses.map(encodeHexTopic),
+          ],
+        },
+        {
+          blocksBack: 400000,
+        },
+      ),
+    ]);
+
+    // any token transfers between user and their subscribed colonies
+    const userAndColoniesAddressTopics = [
+      walletAddress,
+      ...userColonyAddresses,
+    ].map(encodeHexTopic);
+    const tokenTransactionsPromise = getDecoratedEvents(
+      tokenClient,
+      {
+        topics: [
+          Transfer.interface.topics,
+          userAndColoniesAddressTopics,
+          userAndColoniesAddressTopics,
+        ],
+      },
+      {
+        blocksBack: 400000,
+      },
     );
+
+    // await them in parallel
+    const transactions = await Promise.all([
+      colonyTransactionsPromise
+        .then(flatten)
+        .then(filterTransactionsFromCurrentUser)
+        .then(decodeTransactionData(metaColonyClient)),
+      tokenTransactionsPromise.then(decodeTransactionData(tokenClient)),
+    ])
+      .then(flatten)
+      .then(mergeByHash)
+      .then(txs => txs.filter(tx => !!tx.functionName))
+      .then(normalize);
+
+    return sortBy(transactions, ['timestamp']);
   },
 };
 

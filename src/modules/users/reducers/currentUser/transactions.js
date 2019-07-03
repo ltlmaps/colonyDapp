@@ -5,7 +5,7 @@ import { List } from 'immutable';
 import type { CurrentUserTransactionsType } from '~immutable';
 import type { ReducerType } from '~redux';
 
-import { ContractTransactionRecord, DataRecord } from '~immutable';
+import { DataRecord } from '~immutable';
 import { ACTIONS } from '~redux';
 import { withDataRecord } from '~utils/reducers';
 
@@ -24,7 +24,8 @@ const currentUserTransactionsReducer: ReducerType<
       const { transactions } = action.payload;
       return state.set(
         'record',
-        List(transactions.map(tx => ContractTransactionRecord(tx))),
+        // List(transactions.map(tx => ContractTransactionRecord(tx))),
+        List(transactions),
       );
     }
     default:
