@@ -7,7 +7,7 @@ import metamaskWallet, { accountChangeHook } from '@colony/purser-metamask';
 import ledgerWallet from '@colony/purser-ledger';
 import trezorWallet from '@colony/purser-trezor';
 import { TrufflepigLoader } from '@colony/colony-js-contract-loader-http';
-import { getNetworkClient } from '@colony/colony-js-client';
+import { getNetworkClient } from '@area/colony-js-client';
 
 import { Action, ActionTypes, AllActions } from '~redux/index';
 import { DEFAULT_NETWORK } from '~constants';

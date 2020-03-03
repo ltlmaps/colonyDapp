@@ -1,5 +1,5 @@
 import { call } from 'redux-saga/effects';
-import { getNetworkClient } from '@colony/colony-js-client';
+import { getNetworkClient } from '@area/colony-js-client';
 
 import { DEFAULT_NETWORK } from '~constants';
 import { TEMP_getNewContext } from '~context/index';

@@ -1,5 +1,5 @@
 import { Record } from 'immutable';
-import { SendOptions } from '@colony/colony-js-client';
+import { SendOptions } from '@area/colony-js-client';
 import BigNumber from 'bn.js';
 
 import {

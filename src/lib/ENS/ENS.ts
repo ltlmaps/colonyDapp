@@ -4,7 +4,7 @@ import namehash from 'eth-ens-namehash-ms';
 import { isAddress } from 'web3-utils';
 import punycode from 'punycode';
 
-import ColonyNetworkClient from '@colony/colony-js-client';
+import ColonyNetworkClient from '@area/colony-js-client';
 
 import { Address, ENSName } from '~types/index';
 import { createAddress } from '~utils/web3';

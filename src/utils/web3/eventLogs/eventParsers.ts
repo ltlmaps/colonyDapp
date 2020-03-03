@@ -2,7 +2,7 @@ import {
   ColonyClient as ColonyClientType,
   TokenClient as TokenClientType,
   FUNDING_POT_TYPE_PAYMENT,
-} from '@colony/colony-js-client';
+} from '@area/colony-js-client';
 import Web3EthAbi from 'web3-eth-abi';
 
 import BigNumber from 'bn.js';

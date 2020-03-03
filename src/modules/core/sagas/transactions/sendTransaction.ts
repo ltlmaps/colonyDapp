@@ -1,4 +1,4 @@
-import { ContractResponse } from '@colony/colony-js-client';
+import { ContractResponse } from '@area/colony-js-client';
 import { call, put, take } from 'redux-saga/effects';
 
 import { ActionTypes } from '~redux/index';

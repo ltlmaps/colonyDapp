@@ -3,7 +3,7 @@ import {
   ColonyNetworkClient as ColonyNetworkClientType,
   ColonyClient as ColonyClientType,
   TokenClient as TokenClientType,
-} from '@colony/colony-js-client';
+} from '@area/colony-js-client';
 
 import { LogFilterOptions } from './types';
 

@@ -1,5 +1,5 @@
-import ColonyNetworkClient from '@colony/colony-js-client';
-import TokenClient from '@colony/colony-js-client/lib/TokenClient';
+import ColonyNetworkClient from '@area/colony-js-client';
+import TokenClient from '@area/colony-js-client/lib/TokenClient';
 import EthersAdapter from '@colony/colony-js-adapter-ethers';
 import { isAddress } from 'web3-utils';
 

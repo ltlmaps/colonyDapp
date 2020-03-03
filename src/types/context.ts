@@ -1,7 +1,7 @@
 import {
   ColonyClient as ColonyClientType,
   ColonyNetworkClient as NetworkClientType,
-} from '@colony/colony-js-client';
+} from '@area/colony-js-client';
 
 import { WalletObjectType } from '@colony/purser-core';
 import IPFSNodeType from '../lib/ipfs/index';

@@ -1,6 +1,6 @@
 import { $PropertyType, $Values } from 'utility-types';
 
-import { ColonyClient as ColonyClientType } from '@colony/colony-js-client';
+import { ColonyClient as ColonyClientType } from '@area/colony-js-client';
 
 export type ColonyClientEvent = $Values<
   $PropertyType<ColonyClientType, 'events'>

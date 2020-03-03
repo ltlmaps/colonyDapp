@@ -1,4 +1,4 @@
-import { SendOptions, ContractResponse } from '@colony/colony-js-client';
+import { SendOptions, ContractResponse } from '@area/colony-js-client';
 import BigNumber from 'bn.js';
 
 import { ContractContexts, TransactionReceipt } from '~types/index';

@@ -1,4 +1,4 @@
-import { ColonyNetworkClient } from '@colony/colony-js-client';
+import { ColonyNetworkClient } from '@area/colony-js-client';
 
 import BigNumber from 'bn.js';
 

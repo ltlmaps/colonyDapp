@@ -6,7 +6,7 @@ import {
   COLONY_ROLE_FUNDING,
   COLONY_ROLE_RECOVERY,
   COLONY_ROLE_ROOT,
-} from '@colony/colony-js-client';
+} from '@area/colony-js-client';
 
 export const ADMIN_NAMESPACE = 'admin';
 export const ADMIN_TRANSACTIONS = 'transactions';

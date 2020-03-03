@@ -1,4 +1,4 @@
-import { ContractResponse } from '@colony/colony-js-client';
+import { ContractResponse } from '@area/colony-js-client';
 import { buffers, END, eventChannel } from 'redux-saga';
 
 import { TransactionRecord } from '~immutable/index';
