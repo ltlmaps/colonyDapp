@@ -12,6 +12,7 @@ const NETWORK = process.env.NETWORK || 'local';
 
 const configMap = {
   mainnet: prodConfig,
+  playground: prodConfig,
   local: devConfig,
   goerli: qaConfig,
 };
