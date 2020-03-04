@@ -42,10 +42,10 @@
     ts-invariant "^0.4.4"
     tslib "^1.10.0"
 
-"@area/colony-js-client@1.14.6-playground.1":
-  version "1.14.6-playground.1"
-  resolved "https://registry.yarnpkg.com/@area/colony-js-client/-/colony-js-client-1.14.6-playground.1.tgz#d5ff4a53067b03baef6b269eca98cb663825435a"
-  integrity sha512-+vLUI1ybR91OXJed8Um4/Ir71hROZmsYa9GSQruRMGee223R0y1lYfpPPeNzTj/P6DidUgzZ37PVp57ArESbtQ==
+"@area/colony-js-client@1.14.6-playground.2":
+  version "1.14.6-playground.2"
+  resolved "https://registry.yarnpkg.com/@area/colony-js-client/-/colony-js-client-1.14.6-playground.2.tgz#417ff4a2362d766bb701eb76e1665d0a78ee04a4"
+  integrity sha512-xKgVoIaxYf5cA2t71HNfL7RryVKBgVA6uqtZeBG8gfJUF09VtSg8fJz5XscJA9+N0tytDGeS+Jl0wlaLhwB3xQ==
   dependencies:
     "@colony/colony-js-adapter" "^1.14.0-beta.2"
     "@colony/colony-js-adapter-ethers" "^1.14.3"
