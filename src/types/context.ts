@@ -3,7 +3,7 @@ import {
   ColonyNetworkClient as NetworkClientType,
 } from '@area/colony-js-client';
 
-import { WalletObjectType } from '@colony/purser-core';
+import { WalletObjectType } from '@area/purser-core';
 import IPFSNodeType from '../lib/ipfs/index';
 
 export * from '../lib/ColonyManager/types';

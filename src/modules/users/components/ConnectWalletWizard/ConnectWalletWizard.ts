@@ -1,6 +1,6 @@
 import { withProps } from 'recompose';
-import ledgerWallet from '@colony/purser-ledger';
-import trezorWallet from '@colony/purser-trezor';
+import ledgerWallet from '@area/purser-ledger';
+import trezorWallet from '@area/purser-trezor';
 
 import { WALLET_SPECIFICS } from '~immutable/index';
 import withWizard from '~core/Wizard/withWizard';

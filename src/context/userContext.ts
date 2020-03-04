@@ -1,4 +1,4 @@
-import { WalletObjectType } from '@colony/purser-core';
+import { WalletObjectType } from '@area/purser-core';
 
 import ColonyManager from '../lib/ColonyManager';
 

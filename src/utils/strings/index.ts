@@ -1,5 +1,5 @@
-import { addressValidator } from '@colony/purser-core/validators';
-import { addressNormalizer } from '@colony/purser-core/normalizers';
+import { addressValidator } from '@area/purser-core/validators';
+import { addressNormalizer } from '@area/purser-core/normalizers';
 import generate from 'nanoid/generate';
 import urlDictionary from 'nanoid/url';
 

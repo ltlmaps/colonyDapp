@@ -2,10 +2,10 @@ import { eventChannel } from 'redux-saga';
 
 import { call, put, spawn, take, takeLatest, all } from 'redux-saga/effects';
 
-import softwareWallet from '@colony/purser-software';
-import metamaskWallet, { accountChangeHook } from '@colony/purser-metamask';
-import ledgerWallet from '@colony/purser-ledger';
-import trezorWallet from '@colony/purser-trezor';
+import softwareWallet from '@area/purser-software';
+import metamaskWallet, { accountChangeHook } from '@area/purser-metamask';
+import ledgerWallet from '@area/purser-ledger';
+import trezorWallet from '@area/purser-trezor';
 import { TrufflepigLoader } from '@colony/colony-js-contract-loader-http';
 import { getNetworkClient } from '@area/colony-js-client';
 

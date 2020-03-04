@@ -1,8 +1,8 @@
 import { FormikBag } from 'formik';
 import React, { Component, SyntheticEvent } from 'react';
 import { defineMessages } from 'react-intl';
-import { open } from '@colony/purser-metamask';
-import { staticMethods as metamaskMessages } from '@colony/purser-metamask/messages';
+import { open } from '@area/purser-metamask';
+import { staticMethods as metamaskMessages } from '@area/purser-metamask/messages';
 
 import { WizardProps } from '~core/Wizard';
 import { mergePayload } from '~utils/actions';

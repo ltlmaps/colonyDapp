@@ -1,6 +1,6 @@
 import React from 'react';
 import { defineMessages } from 'react-intl';
-import softwareWallet from '@colony/purser-software';
+import softwareWallet from '@area/purser-software';
 
 import { WizardProps } from '~core/Wizard';
 
